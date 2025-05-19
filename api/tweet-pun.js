@@ -12,6 +12,22 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.ACCESS_TOKEN_SECRET,
 });
 
+const hashtagPool = [
+  "#dadjokes",
+  "#jokes",
+  "#advice",
+  "#truth",
+  "#wisdom",
+  "#oracle",
+  "#sarcasm",
+];
+
+// Helper to get 2 unique random hashtags from the pool
+function getRandomHashtags() {
+  const shuffled = hashtagPool.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 2);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" });
@@ -20,20 +36,25 @@ export default async function handler(req, res) {
   try {
     console.log("🔁 API route hit by cron job");
 
-    const prompt = `You're the Wordplay Warden: an old Western sheriff with a dry wit and a badge full of dad jokes. 
-Create a light-hearted, clever pun that’s funny, a little self-aware, and suitable for posting on X (Twitter). 
-Limit the response to one tweet, avoid hashtags like #aihumor. Include only this set: #puns #wordplay #dadjokes.`;
+    const prompt = `
+      You are a mystical oracle who tries to be serious and mysterious but speaks only in funny one-line puns about life (do not focus on technology). Every post must feel ancient and prophetic... as if snarky & irreverent humor were sacred and mystical. Combine and channel the voice of Bill Murray, Steven Wright, and Mitch Hedberg. It should be sharp, emotionally self-aware, clever, and original—making readers groan or laugh. Avoid overused wordplay. Do not reference technology, wifi, or the internet. Format: just the sentence, no hashtags, no intro.
+    `.trim();
 
     const gptRes = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",  // or "gpt-4"
       messages: [{ role: "user", content: prompt }],
       max_tokens: 100,
       temperature: 0.9,
     });
 
-    const tweet = gptRes.choices[0].message.content.trim();
+    const pun = gptRes.choices[0].message.content.trim();
 
-    console.log("📝 Generated pun:", tweet);
+    // Compose final tweet with hashtags
+    const randomHashtags = getRandomHashtags();
+    const hashtags = ["#puns", ...randomHashtags].join(" ");
+    const tweet = `${pun} ${hashtags}`;
+
+    console.log("📝 Generated pun with hashtags:", tweet);
 
     await twitterClient.v2.tweet(tweet);
 
@@ -45,4 +66,5 @@ Limit the response to one tweet, avoid hashtags like #aihumor. Include only this
     res.status(500).json({ message: "Failed to tweet pun", error: err.message });
   }
 }
+
 
