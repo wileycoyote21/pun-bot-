@@ -2,8 +2,9 @@ name: Cron Tweet Oracle
 
 on:
   schedule:
-    # Every hour from 10am to 12am EST (which is 2pm–4am UTC)
-    - cron: '0 14-4 * * *'
+    # Every hour from 10am to midnight EST, split into two ranges in UTC
+    - cron: '0 15-23 * * *'  # 10am to 6pm EST (15:00 to 23:00 UTC)
+    - cron: '0 0-4 * * *'    # 7pm to midnight EST (00:00 to 04:00 UTC)
 
 jobs:
   tweet:
@@ -13,3 +14,4 @@ jobs:
       - name: Hit oracle tweet endpoint
         run: |
           curl -X GET https://pun-bot-eta.vercel.app/api/tweet-pun
+
