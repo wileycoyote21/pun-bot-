@@ -33,7 +33,7 @@ jobs:
         run: npm install
 
       - name: Run Reply Oracle Bot
-        run: node replyBot/replyOracleBot.js --maxReplies=1
+        run: node reply-bot/replyOraclebot.js --maxReplies=1
         env:
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
           TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
