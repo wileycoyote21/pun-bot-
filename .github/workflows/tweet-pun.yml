@@ -2,8 +2,9 @@ name: Cron Tweet Pun
 
 on:
   schedule:
-    - cron: '0 14-23 * * *'
-    - cron: '0 0-3 * * *'
+    - cron: '0 14 * * *'  # 9:00 AM EST
+    - cron: '0 20 * * *'  # 3:00 PM EST
+    - cron: '0 2 * * *'   # 9:00 PM EST (which is 2 AM UTC next day)
   workflow_dispatch:
 
 jobs:
