@@ -2,7 +2,6 @@ name: Oracle Reply Bot
 
 on:
   schedule:
-    # 10 random times throughout the day between 10:00 AM and 11:59 PM EST
     - cron: '0 14 * * *'    # 10:00 AM EST
     - cron: '17 15 * * *'   # 11:17 AM EST
     - cron: '33 16 * * *'   # 12:33 PM EST
@@ -20,19 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Oracle reply API endpoint
-        run: curl -X GET https://your-vercel-project.vercel.app/api/reply-oracle
+        run: curl -X GET https://pun-bot-eta.vercel.app/api/reply-oracle
 
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run Oracle reply bot
-        run: node api/replyOraclebot.js
-        env:
-          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
-          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
-          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
-          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
