@@ -2,7 +2,7 @@ name: Oracle Reply Bot
 
 on:
   schedule:
-    # Keep your current cron schedule times
+    # 10 random times throughout the day between 10:00 AM and 11:59 PM EST
     - cron: '0 14 * * *'    # 10:00 AM EST
     - cron: '17 15 * * *'   # 11:17 AM EST
     - cron: '33 16 * * *'   # 12:33 PM EST
@@ -19,7 +19,7 @@ jobs:
   oracle-reply:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger reply-oracle endpoint
-        run: |
-          curl -X GET https://pun-bot-eta.vercel.app/api/reply-oracle
+      - name: Trigger Oracle reply API endpoint
+        run: curl -X GET https://your-vercel-project.vercel.app/api/reply-oracle
+
 
