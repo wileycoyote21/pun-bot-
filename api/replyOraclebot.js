@@ -5,8 +5,7 @@ import fs from "fs";
 
 dotenv.config();
 
-const twitterClient = new TwitterApi(process.env.TWITTER_BEARER_TOKEN);
-const rwClient = new TwitterApi({
+const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_API_KEY,
   appSecret: process.env.TWITTER_API_SECRET,
   accessToken: process.env.TWITTER_ACCESS_TOKEN,
@@ -76,7 +75,7 @@ async function generateReply(tweetText) {
 }
 
 async function replyToTweet(tweet, replyText) {
-  await rwClient.v2.reply(replyText, tweet.id);
+  await twitterClient.v2.reply(replyText, tweet.id);
 }
 
 // This is the new export handler function Vercel requires:
