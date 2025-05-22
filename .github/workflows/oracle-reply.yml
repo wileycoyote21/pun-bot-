@@ -23,3 +23,16 @@ jobs:
         run: curl -X GET https://your-vercel-project.vercel.app/api/reply-oracle
 
 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Oracle reply bot
+        run: node api/replyOraclebot.js
+        env:
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
