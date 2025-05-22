@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: Trigger tweet-pun endpoint
         run: |
-          curl -X GET https://your-vercel-domain.vercel.app/api/tweet-pun
+          curl -X GET https://pun-bot-eta.vercel.app/api/tweet-pun
 
