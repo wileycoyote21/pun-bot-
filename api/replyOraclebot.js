@@ -79,45 +79,53 @@ async function replyToTweet(tweet, replyText) {
   await rwClient.v2.reply(replyText, tweet.id);
 }
 
-async function main() {
-  const replyLog = loadReplyLog();
-  const now = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+// This is the new export handler function Vercel requires:
+export default async function handler(req, res) {
+  try {
+    const replyLog = loadReplyLog();
+    const now = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-  for (const category of CATEGORIES) {
-    const repliesToday = replyLog[category]?.filter((entry) =>
-      entry.startsWith(now)
-    ) || [];
+    for (const category of CATEGORIES) {
+      const repliesToday = replyLog[category]?.filter((entry) =>
+        entry.startsWith(now)
+      ) || [];
 
-    if (repliesToday.length >= MAX_DAILY_REPLIES) {
-      console.log(`Max replies reached for ${category}`);
-      continue;
-    }
-
-    const tweets = await searchTweets(category);
-
-    for (const tweet of tweets) {
-      if (
-        shouldFilterOut(tweet.text) ||
-        repliesToday.includes(`${now}_${tweet.id}`)
-      ) {
+      if (repliesToday.length >= MAX_DAILY_REPLIES) {
+        console.log(`Max replies reached for ${category}`);
         continue;
       }
 
-      const replyText = await generateReply(tweet.text);
-      await replyToTweet(tweet, replyText);
+      const tweets = await searchTweets(category);
 
-      // Log it
-      replyLog[category] = replyLog[category] || [];
-      replyLog[category].push(`${now}_${tweet.id}`);
-      saveReplyLog(replyLog);
-      console.log(`Replied to tweet ID ${tweet.id}`);
-      return; // Stop after one reply
+      for (const tweet of tweets) {
+        if (
+          shouldFilterOut(tweet.text) ||
+          repliesToday.includes(`${now}_${tweet.id}`)
+        ) {
+          continue;
+        }
+
+        const replyText = await generateReply(tweet.text);
+        await replyToTweet(tweet, replyText);
+
+        // Log it
+        replyLog[category] = replyLog[category] || [];
+        replyLog[category].push(`${now}_${tweet.id}`);
+        saveReplyLog(replyLog);
+        console.log(`Replied to tweet ID ${tweet.id}`);
+
+        res.status(200).json({ success: true, message: `Replied to tweet ID ${tweet.id}` });
+        return; // Stop after one reply and respond
+      }
     }
-  }
 
-  console.log("No eligible tweets to reply to.");
+    console.log("No eligible tweets to reply to.");
+    res.status(200).json({ success: true, message: "No eligible tweets to reply to." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 }
 
-main();
 
 
