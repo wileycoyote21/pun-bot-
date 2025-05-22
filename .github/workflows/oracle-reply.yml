@@ -21,5 +21,5 @@ jobs:
     steps:
       - name: Trigger reply-oracle endpoint
         run: |
-          curl -X GET https://your-vercel-domain.vercel.app/api/reply-oracle
+          curl -X GET https://pun-bot-eta.vercel.app//api/reply-oracle
 
