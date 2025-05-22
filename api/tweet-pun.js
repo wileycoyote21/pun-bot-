@@ -1,67 +1,64 @@
-import OpenAI from "openai";
-import { TwitterApi } from "twitter-api-v2";
+import OpenAI from 'openai';
+import dotenv from 'dotenv';
+import { TwitterApi } from 'twitter-api-v2';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+dotenv.config();
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const twitterClient = new TwitterApi({
-  appKey: process.env.TWITTER_API_KEY,
-  appSecret: process.env.TWITTER_API_SECRET,
-  accessToken: process.env.ACCESS_TOKEN,
-  accessSecret: process.env.ACCESS_TOKEN_SECRET,
+  appKey: process.env.TWITTER_APP_KEY,
+  appSecret: process.env.TWITTER_APP_SECRET,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN,
+  accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
-export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
+async function generateTweet() {
+  const prompt = `
+You are an amateur oracle who tweets cryptic one-liners that sound wise or satirical.
+Each tweet should sound clever at first glance, but fall apart under scrutiny.
+Keep the tone dry, witty, and lightly absurd. Avoid hashtags or emojis inside the text.
+
+Output format: just the quote as a one-liner followed by either #wisdom or #satire based on the tone.
+Examples:
+- “Don’t follow your dreams. They tend to wander off cliffs. #wisdom”
+- “The first step to self-awareness is loudly interrupting someone else’s. #satire”
+- “You can’t fail if you never define success. #wisdom”
+`;
 
   try {
-    console.log("🔁 API route hit by cron job");
-    console.log("🔐 Access token starts with:", process.env.ACCESS_TOKEN?.slice(0, 5));
-
-    // 🧪 Check authentication and rate limit info
-    try {
-      const meResponse = await twitterClient.v2.me({ fullResponse: true });
-      const { data, rateLimit } = meResponse;
-      console.log("🐦 Authenticated as:", data);
-      console.log("📊 Rate limit info:", rateLimit);
-      console.log("⏰ Limit resets at:", new Date(rateLimit.reset * 1000));
-    } catch (authErr) {
-      console.error("❌ Auth check failed:", authErr.data || authErr.message);
-    }
-
-    const prompt = `
-You are a mystical oracle who is tasked with giving life advice in short story format, no longer than 3 sentences. The world looks up to you for wisdom and guidance so give it to us. You fully embrace dad jokes & the life advice never lands. Incorporate puns wherever it would be appropriate. Assume you're a big & popular personality in your community. Your tone must be deadpan, empathetic, self deprecating, and relatable. Every post must feel ancient and prophetic. The pun should be sharp, emotionally self-aware, clever, and original—making readers groan or laugh. Avoid overused wordplay. Do not reference technology, wifi, or the internet.
-    `.trim();
-
-    const gptRes = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Or "gpt-4"
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 120,
-      temperature: 0.9,
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        { role: 'system', content: prompt }
+      ],
+      max_tokens: 100,
+      temperature: 0.9
     });
 
-    const pun = gptRes.choices[0].message.content.trim();
-    const hashtags = "#puns #comedian #dadjokes";
-    const tweet = `${pun} ${hashtags}`;
-
-    console.log("📝 Generated tweet:", tweet);
-
-    const tweetResponse = await twitterClient.v2.tweet(tweet, { fullResponse: true });
-    const { data: tweetData, rateLimit: tweetRateLimit } = tweetResponse;
-
-    console.log("✅ Tweet posted:", tweetData);
-    console.log("📊 Tweet rate limit:", tweetRateLimit);
-    console.log("⏰ Tweet limit resets at:", new Date(tweetRateLimit.reset * 1000));
-
-    res.status(200).json({ message: "Tweeted successfully!", tweet });
-  } catch (err) {
-    console.error("❌ Error tweeting:", err.message);
-    res.status(500).json({ message: "Failed to tweet", error: err.message });
+    const tweet = completion.choices[0].message.content.trim();
+    return tweet;
+  } catch (error) {
+    console.error('Error generating tweet:', error);
+    return null;
   }
 }
+
+async function postTweet(tweetText) {
+  try {
+    const tweet = await twitterClient.v2.tweet(tweetText);
+    console.log('Tweet posted:', tweet);
+  } catch (error) {
+    console.error('Error posting tweet:', error);
+  }
+}
+
+(async () => {
+  const tweet = await generateTweet();
+  if (tweet) {
+    await postTweet(tweet);
+  }
+})();
 
 
 
